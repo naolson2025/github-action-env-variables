@@ -1,0 +1,48 @@
+name: Deployment
+on:
+  push:
+    branches:
+      - main
+      - dev
+# can set env variables at different levels
+# this is the top level which makes them available to all jobs
+env:
+  MONGODB_DB_NAME: gha-demo
+jobs:
+  test:
+    # env variables specified here are only available to this job
+    env:
+      MONGODB_CLUSTER_ADDRESS: cluster0.abcde.mongodb.net
+      MONGODB_USERNAME: nick
+      MONGODB_PASSWORD: fakepassword
+      PORT: 8080
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-deps-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Run server
+        # linux uses $ENV_VAR, windows uses %ENV_VAR%
+        # here our syntax is linux
+        run: npm start & npx wait-on http://127.0.0.1:$PORT
+      - name: Run tests
+        run: npm test
+      - name: Output information
+        # we can also access env variable like this
+        run: echo "MONGODB_USERNAME ${{ env.MONGODB_USERNAME }}"
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output information
+        # The MONGODB_USERNAME will be undefined because it is scoped only to the test job
+        # The MONGODB_DB_NAME will be defined because it is scoped to the top level
+        run: |  
+          echo "MONGODB_USERNAME ${{ env.MONGODB_USERNAME }}"
+          echo "MONGODB_DB_NAME ${{ env.MONGODB_DB_NAME }}"
