@@ -10,6 +10,8 @@ env:
   MONGODB_DB_NAME: gha-demo
 jobs:
   test:
+    # This will use the Testing environment that was set up in Github
+    environment: Testing
     # env variables specified here are only available to this job
     env:
       MONGODB_CLUSTER_ADDRESS: cluster0.abcde.mongodb.net
