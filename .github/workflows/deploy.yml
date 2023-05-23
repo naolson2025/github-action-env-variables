@@ -13,8 +13,8 @@ jobs:
     # env variables specified here are only available to this job
     env:
       MONGODB_CLUSTER_ADDRESS: cluster0.abcde.mongodb.net
-      MONGODB_USERNAME: nick
-      MONGODB_PASSWORD: fakepassword
+      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+      MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
       PORT: 8080
     runs-on: ubuntu-latest
     steps:
